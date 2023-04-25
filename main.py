@@ -408,6 +408,7 @@ class Ui_Calculator(object):
         self.pushButton_clear.clicked.connect(lambda: self.label.setText('0'))
 
     def button_click_handler(self, button_value: str) -> None:
+        """Handle every button click, do some validation and call functions corresponded to each button/button group"""
         self.operations = ('+', '-', '*', '/', '**')
         current_label_text = self.label.text()
 
@@ -429,6 +430,9 @@ class Ui_Calculator(object):
                 label_text=current_label_text, button_value=button_value)
 
     def digit_input(self, label_text: str, button_value: str) -> None:
+        """An integer will be addet to label text depending on conditions:
+            if label text is default zero OR button '=' was previous clicked  - text will be rewriten
+            normally every integer will be added to existing text"""
         if label_text != '0':
             if self.after_calculate:
                 update = button_value
@@ -441,6 +445,8 @@ class Ui_Calculator(object):
         self.label.setText(update)
 
     def operation_input(self, label_text: str, button_value: str) -> None:
+        """Operations will be displayed only if it is preceded by a number
+            no more than one operations are available to add in a row"""
         self.after_calculate = False
         if not label_text.strip().endswith((*self.operations, '.')):
             update = label_text + f' {button_value} '
@@ -450,6 +456,8 @@ class Ui_Calculator(object):
         self.label.setText(update)
 
     def point_input(self, label_text: str, button_value: str) -> None:
+        """It is possible to add just one point to one number,
+            impossible to write 2 or more points in a row"""
         self.after_calculate = False
         if not label_text.strip().endswith((*self.operations, '.')):
             update = label_text + button_value
@@ -460,6 +468,11 @@ class Ui_Calculator(object):
             self.label.setText(update)
 
     def calculate(self, label_text: str) -> None:
+        """Label text will be calculated via 'eval' function, and rewritten
+            with calculating result, 
+            result is limited by 6 characters after coma
+            after displaying result, calling any 'digit_input' will rewrite label text
+            call any other button click function will continue operations with result"""
         try:
             result = eval(label_text) 
             update = str(round(result, 6))
@@ -471,6 +484,8 @@ class Ui_Calculator(object):
             self.label.setText('0')
 
     def backspace(self, label_text: str) -> None:
+        """Erases the last character from right side
+            if last remaining character was deleted, default zero will be displayed"""
         self.after_calculate = False
         if len(label_text) == 1:
             update = '0'
@@ -482,6 +497,8 @@ class Ui_Calculator(object):
         self.label.setText(update)
 
     def custom_functions(self, label_text: str, button_value: str) -> None:
+        """Calls one of available custom functions, 
+            changes only latest number in label text"""
         self.after_calculate = False
         label_list = label_text.strip().split()
         last_number = label_list[-1]        
